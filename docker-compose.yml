@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  gateway:
+    build: 
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    environment:
+      - GATEWAY_HOST=0.0.0.0
+      - GATEWAY_PORT=8000
+
+  worker1:
+    build: 
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["python", "-m", "app.worker"]
+    depends_on:
+      - gateway
+    environment:
+      - WORKER_HOST=worker1
+      - WORKER_PORT=8001
+      - WORKER_GATEWAY_URL=http://gateway:8000
+      - API_BASE_URL=${API_BASE_URL}
+      - API_KEY=${API_KEY}
+
+  worker2:
+    build: 
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["python", "-m", "app.worker"]
+    depends_on:
+      - gateway
+    environment:
+      - WORKER_HOST=worker2
+      - WORKER_PORT=8002
+      - WORKER_GATEWAY_URL=http://gateway:8000
+      - API_BASE_URL=${API_BASE_URL}
+      - API_KEY=${API_KEY}

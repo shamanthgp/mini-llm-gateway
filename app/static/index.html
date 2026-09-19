@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniLLM Gateway Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">MiniLLM Gateway</div>
+            <nav>
+                <button class="nav-item active" data-tab="chat">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Chat
+                </button>
+                <button class="nav-item" data-tab="workers">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                    Workers
+                </button>
+                <button class="nav-item" data-tab="metrics">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    Metrics
+                </button>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <!-- CHAT VIEW -->
+            <section id="chat-view" class="view active">
+                <header class="view-header">
+                    <h2>Chat Console</h2>
+                    <div class="header-actions">
+                        <input type="text" id="model-select" class="glass-select" value="gpt-4o" title="Type 'gpt-3.5-turbo' for Mock, 'ollama-qwen' for Ollama, or any valid API model (e.g., 'gpt-4o', 'claude-3-opus')" style="width: 250px;">
+                        <button id="clear-btn" class="glass-btn">Clear</button>
+                    </div>
+                </header>
+                <div class="chat-container">
+                    <div id="chat-messages" class="messages-area">
+                        <!-- Messages go here -->
+                        <div class="message assistant">
+                            <div class="avatar">AI</div>
+                            <div class="content">Hello! I am connected to the LLM Gateway. How can I help?</div>
+                        </div>
+                    </div>
+                    <div class="input-area">
+                        <form id="chat-form">
+                            <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off">
+                            <button type="submit" id="send-btn">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Request Debug Panel -->
+                <div class="debug-panel">
+                    <h3>Request Debugging</h3>
+                    <div class="debug-stats">
+                        <span id="debug-req-id">-</span>
+                        <span id="debug-latency">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- WORKERS VIEW -->
+            <section id="workers-view" class="view hidden">
+                <header class="view-header">
+                    <h2>Worker Registry</h2>
+                    <button id="refresh-workers" class="glass-btn">Refresh</button>
+                </header>
+                <div class="table-container glass-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Worker ID</th>
+                                <th>Host:Port</th>
+                                <th>Model</th>
+                                <th>Status</th>
+                                <th>Active Requests</th>
+                                <th>Uptime</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workers-tbody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- METRICS VIEW -->
+            <section id="metrics-view" class="view hidden">
+                <header class="view-header">
+                    <h2>Global Metrics</h2>
+                    <button id="refresh-metrics" class="glass-btn">Refresh</button>
+                </header>
+                <div class="metrics-grid">
+                    <div class="metric-card glass-panel">
+                        <h3>Total Requests</h3>
+                        <div class="metric-value" id="metric-total">0</div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <h3>Successful</h3>
+                        <div class="metric-value" id="metric-success">0</div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <h3>Failed</h3>
+                        <div class="metric-value error" id="metric-failed">0</div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <h3>Avg Latency (ms)</h3>
+                        <div class="metric-value" id="metric-latency">0</div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <h3>Active Requests</h3>
+                        <div class="metric-value" id="metric-active">0</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
