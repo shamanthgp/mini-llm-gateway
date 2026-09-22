@@ -9,7 +9,9 @@ def test_heartbeat_endpoint():
         "host": "localhost",
         "port": 9999,
         "status": "ready",
-        "active_requests": 0
+        "active_requests": 0,
+        "model_name": "mock-model",
+        "uptime": 100.0
     }
     response = client.post("/worker/heartbeat", json=payload)
     assert response.status_code == 200
