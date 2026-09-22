@@ -31,5 +31,6 @@ jobs:
         # Provide some dummy env vars that tests might expect
         INFERENCE_ENGINE: mock
         API_KEY: dummy_key
+        PYTHONPATH: .
       run: |
         pytest
