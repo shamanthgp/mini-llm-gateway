@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import List, Optional, Dict
+from pydantic import BaseModel, ConfigDict
+from typing import List, Optional, Dict, Union
 
 class WorkerHeartbeat(BaseModel):
     worker_name: str
@@ -11,10 +11,12 @@ class WorkerHeartbeat(BaseModel):
     uptime: float
 
 class ChatMessage(BaseModel):
+    model_config = ConfigDict(extra="allow")
     role: str
-    content: str
+    content: Optional[Union[str, list]] = None
 
 class ChatCompletionRequest(BaseModel):
+    model_config = ConfigDict(extra="allow")
     model: str
     messages: List[ChatMessage]
     temperature: Optional[float] = 0.7

@@ -1,4 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const apiKeyInput = document.getElementById('api-key-input');
+    
+    if (localStorage.getItem('gateway_api_key')) {
+        apiKeyInput.value = localStorage.getItem('gateway_api_key');
+    }
+    
+    apiKeyInput.addEventListener('input', (e) => {
+        localStorage.setItem('gateway_api_key', e.target.value.trim());
+    });
+    
+    function getHeaders() {
+        const headers = { 'Content-Type': 'application/json' };
+        const key = localStorage.getItem('gateway_api_key');
+        if (key) {
+            headers['Authorization'] = `Bearer ${key}`;
+        }
+        return headers;
+    }
+
     // Navigation
     const navItems = document.querySelectorAll('.nav-item');
     const views = document.querySelectorAll('.view');
@@ -56,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const startTime = Date.now();
             const response = await fetch('/v1/chat/completions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getHeaders(),
                 body: JSON.stringify({
                     model: modelSelect.value,
                     messages: messages,
@@ -87,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (dataStr === '[DONE]') continue;
                         try {
                             const data = JSON.parse(dataStr);
-                            if (data.error) throw new Error(data.error);
+                            if (data.error) throw new Error(data.error.message || data.error);
                             if (data.choices && data.choices[0].delta && data.choices[0].delta.content) {
                                 aiText += data.choices[0].delta.content;
                                 contentDiv.innerHTML = marked.parse(aiText);
@@ -120,7 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Workers Dashboard
     async function fetchWorkers() {
         try {
-            const res = await fetch('/workers');
+            const res = await fetch('/workers', { headers: getHeaders() });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             const tbody = document.getElementById('workers-tbody');
             tbody.innerHTML = '';
@@ -150,7 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Metrics Dashboard
     async function fetchMetrics() {
         try {
-            const res = await fetch('/metrics');
+            const res = await fetch('/metrics', { headers: getHeaders() });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             document.getElementById('metric-total').textContent = data.total_requests;
             document.getElementById('metric-success').textContent = data.successful_requests;

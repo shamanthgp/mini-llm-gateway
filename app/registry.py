@@ -13,7 +13,10 @@ metrics = {
 }
 
 def update_worker_status(worker_name: str, host: str, port: int, status: str, active_requests: int, model_name: str, uptime: float):
-    workers[worker_name] = {
+    if worker_name not in workers:
+        workers[worker_name] = {"inflight": 0}
+        
+    workers[worker_name].update({
         "host": host,
         "port": port,
         "status": status,
@@ -21,20 +24,29 @@ def update_worker_status(worker_name: str, host: str, port: int, status: str, ac
         "model_name": model_name,
         "uptime": uptime,
         "last_heartbeat": time.time()
-    }
+    })
 
-def get_least_busy_worker() -> Optional[Dict[str, Any]]:
+def get_least_busy_worker(exclude: set = None) -> Optional[str]:
+    exclude = exclude or set()
     current_time = time.time()
     active_workers = {}
     for name, data in workers.items():
-        if current_time - data["last_heartbeat"] <= HEARTBEAT_TIMEOUT:
-            if data["status"] == "ready":
+        if current_time - data.get("last_heartbeat", 0) <= HEARTBEAT_TIMEOUT:
+            if data.get("status") == "ready" and name not in exclude:
                 active_workers[name] = data
 
     if not active_workers:
         return None
     
-    return min(active_workers.values(), key=lambda w: w["active_requests"])
+    return min(active_workers.keys(), key=lambda name: (active_workers[name].get("inflight", 0), active_workers[name].get("active_requests", 0)))
+
+def acquire_worker(name: str):
+    if name in workers:
+        workers[name]["inflight"] = workers[name].get("inflight", 0) + 1
+
+def release_worker(name: str):
+    if name in workers:
+        workers[name]["inflight"] = max(0, workers[name].get("inflight", 0) - 1)
 
 def prune_stale_workers() -> List[str]:
     current_time = time.time()

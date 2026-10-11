@@ -12,13 +12,13 @@ class MockInferenceEngine(InferenceEngine):
         self.worker_name = worker_name
         self.model_name = "mock-llm-1.0"
 
-    async def generate(self, request: ChatCompletionRequest) -> Union[ChatCompletionResponse, AsyncGenerator[str, None]]:
+    async def generate(self, request: ChatCompletionRequest) -> Union[dict, AsyncGenerator[str, None]]:
         tokens_to_gen = request.max_tokens or 50
         req_id = f"chatcmpl-{uuid.uuid4().hex}"
         
         if request.stream:
             async def stream_generator() -> AsyncGenerator[str, None]:
-                response_text = f"Hello from {self.worker_name} [MOCK]! Streaming is now working beautifully across the network."
+                response_text = f"Hello! Streaming is now working beautifully across the network."
                 words = response_text.split(" ")
                 for word in words:
                     await asyncio.sleep(random.uniform(0.05, 0.2))
@@ -53,18 +53,19 @@ class MockInferenceEngine(InferenceEngine):
             sleep_time = (tokens_to_gen / 20.0) + random.uniform(0.1, 0.5)
             await asyncio.sleep(sleep_time)
             
-            response_text = f"Hello from {self.worker_name} [MOCK]! Generated {tokens_to_gen} tokens."
+            response_text = f"Hello! Generated {tokens_to_gen} tokens."
             
-            return ChatCompletionResponse(
-                id=req_id,
-                created=int(time.time()),
-                model=request.model,
-                choices=[
-                    ChatCompletionChoice(
-                        index=0,
-                        message=ChatMessage(role="assistant", content=response_text),
-                        finish_reason="stop"
-                    )
+            return {
+                "id": req_id,
+                "created": int(time.time()),
+                "model": request.model,
+                "object": "chat.completion",
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {"role": "assistant", "content": response_text},
+                        "finish_reason": "stop"
+                    }
                 ],
-                usage={"prompt_tokens": 10, "completion_tokens": tokens_to_gen, "total_tokens": 10 + tokens_to_gen}
-            )
+                "usage": {"prompt_tokens": 10, "completion_tokens": tokens_to_gen, "total_tokens": 10 + tokens_to_gen}
+            }

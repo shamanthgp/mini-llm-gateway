@@ -11,31 +11,21 @@ services:
     environment:
       - GATEWAY_HOST=0.0.0.0
       - GATEWAY_PORT=8000
+      - GATEWAY_API_KEYS=${GATEWAY_API_KEYS:-}
+      - WORKER_SHARED_SECRET=${WORKER_SHARED_SECRET:-secret-placeholder}
 
-  worker1:
+  worker:
     build: 
       context: .
       dockerfile: docker/Dockerfile
     command: ["python", "-m", "app.worker"]
     depends_on:
       - gateway
+    deploy:
+      replicas: 3
     environment:
-      - WORKER_HOST=worker1
-      - WORKER_PORT=8001
       - WORKER_GATEWAY_URL=http://gateway:8000
       - API_BASE_URL=${API_BASE_URL}
       - API_KEY=${API_KEY}
-
-  worker2:
-    build: 
-      context: .
-      dockerfile: docker/Dockerfile
-    command: ["python", "-m", "app.worker"]
-    depends_on:
-      - gateway
-    environment:
-      - WORKER_HOST=worker2
-      - WORKER_PORT=8002
-      - WORKER_GATEWAY_URL=http://gateway:8000
-      - API_BASE_URL=${API_BASE_URL}
-      - API_KEY=${API_KEY}
+      - GATEWAY_API_KEYS=${GATEWAY_API_KEYS}
+      - WORKER_SHARED_SECRET=${WORKER_SHARED_SECRET}

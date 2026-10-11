@@ -12,4 +12,4 @@ def test_add_worker():
 def test_get_least_busy_worker():
     update_worker_status("worker-1", "localhost", 8001, "ready", 5, "mock-model", 100.0)
     update_worker_status("worker-2", "localhost", 8002, "ready", 2, "mock-model", 100.0)
-    assert get_least_busy_worker()["port"] == 8002
+    assert get_least_busy_worker() == "worker-2"

@@ -4,7 +4,7 @@ MiniLLM Gateway is a lightweight, distributed API Gateway for Large Language Mod
 
 ## Features
 - **Least-Busy Request Routing**: The Gateway routes incoming requests to the worker with the smallest queue depth.
-- **Worker Registry & Failover**: Workers send 5-second heartbeats. If a worker goes offline, the gateway instantly stops routing traffic to it.
+- **Worker Registry & Failover**: Workers send 5-second heartbeats. If a worker goes offline or returns an error, the gateway instantly marks it offline and retries on another worker.
 - **Real-Time Streaming**: Full support for Server-Sent Events (SSE). The gateway proxies streaming chunks instantly back to the client.
 - **Global Metrics**: Tracks latency, active requests, successes, and failures across the entire cluster.
 - **Web Dashboard**: An out-of-the-box UI served natively by FastAPI to monitor workers and chat with models.
@@ -68,6 +68,12 @@ If you do not want to pay for API usage, you can use these free alternatives by 
    # For External Cloud APIs (OpenAI, Groq, etc)
    API_BASE_URL=https://api.openai.com/v1
    API_KEY=sk-your-api-key-here
+   
+   # Security
+   GATEWAY_API_KEYS=key1,key2
+   WORKER_SHARED_SECRET=my-secret-token
+   WORKER_ALLOWED_HOSTS=
+   CORS_ORIGINS=http://localhost:8000
    ```
 
 2. **Run the Cluster**:
